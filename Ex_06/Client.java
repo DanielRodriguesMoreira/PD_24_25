@@ -114,6 +114,8 @@ public class Client {
                         // [PT] Escrever os dados recebidos para dentro do ficheiro local
                         // [EN] Write the received data into the local file
                         localFileOutputStream.write(...);
+
+                        contador++;
                     }
 
                 } while (packet.getLength() > 0);
