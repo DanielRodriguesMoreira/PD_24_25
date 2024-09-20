@@ -1,4 +1,4 @@
-package ex_06_incomplete;
+package ex_06;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,40 +19,39 @@ public class Client {
         FileOutputStream localFileOutputStream = null;
         int contador = 0;
 
-        // a)
-        // [PT] Testar a sintaxe
-        // [EN] Test the syntax
-        if (...) {
-            System.out.println("Sintaxe: java Client serverAddress serverUdpPort fileToGet localDirectory");
+        /**
+         * Nas linhas seguintes vamos testar a sintaxe.
+         *
+         * NOTA: isto não é importante para a realização do exercício, no entanto, é algo que devem fazer na resolução
+         *       dos vossos exercícios.
+         */
+        if (args.length != 4) {
+            System.out.println("Sintaxe: java Cliente serverAddress serverUdpPort fileToGet localDirectory");
             return;
         }
 
-        // b)
-        // [PT] Popular as variáveis com os valores dos args
-        // [EN] Populate variables with the arg values
-        fileName = ...
-        localDirectory = ...
+        /**
+         * Nas linhas seguintes estamos a popular as variáveis fileName e localDirectory com os valores que obtemos
+         * quando executamos a aplicação no terminal.
+         */
+        fileName = args[2].trim();
+        localDirectory = new File(args[3].trim());
 
-        // c)
-        // [PT] Verificar se a directoria existe
-        // [EN] Check if the directory exists
-        if (...) {
+        /**
+         * Nas linhas seguintes estamos métodos da classe File que permitem fazer validações ao nível da directoria.
+         * 1º Se a directoria existe
+         * 2º se é uma directoria
+         * 3º se temos permissões para escrita
+         */
+        if (!localDirectory.exists()) {
             System.out.println("A directoria " + localDirectory + " nao existe!");
             return;
         }
-
-        // d)
-        // [PT] Verificar se a directoria é mesmo uma directoria
-        // [EN] Check if the directory is indeed a directory
-        if (...) {
+        if (!localDirectory.isDirectory()) {
             System.out.println("O caminho " + localDirectory + " nao se refere a uma directoria!");
             return;
         }
-
-        // e)
-        // [PT] Verificar se temos acesso de escrita na directoria
-        // [EN] Check if we have write access to the directory
-        if (...) {
+        if (!localDirectory.canWrite()) {
             System.out.println("Sem permissoes de escrita na directoria " + localDirectory);
             return;
         }
@@ -60,12 +59,15 @@ public class Client {
         try {
 
             try {
+                /**
+                 * Nas linhas seguintes vamos criar o objeto que irá ser usado para escrever (output) o ficheiro que
+                 * irá ser recebido via datagrama.
+                 *
+                 * NOTA: neste ponto ainda não estamos a escrever nada no ficheiro, apenas o abrimos para escrita e por isso
+                 *       este já foi criado na directoria e com o nome que especificámos.
+                 */
                 localFilePath = localDirectory.getCanonicalPath() + File.separator + fileName;
-
-                // f)
-                // [PT] Criar instância de objeto que irá ser usado para escrever no ficheiro
-                // [EN] Create object instance that will be used to write the file
-                localFileOutputStream = ...
+                localFileOutputStream = new FileOutputStream(localFilePath);
 
                 System.out.println("Ficheiro " + localFilePath + " criado.");
             } catch (IOException e) {
@@ -78,42 +80,79 @@ public class Client {
             }
 
             try {
-                // g)
-                // [PT] Popular as variáveis com os valores do endereço IP e porto do servidor
-                // [EN] Populate the variables with server address IP and port values
-                serverAddr = ...
-                serverPort = ...
 
-                // h)
-                // [PT] Criar o socket
-                // [EN] Create the socket
-                socket = ...
+                /**
+                 * Nas linhas seguintes vamos popular as variáveis que irão armazenar o IP e porto do servidor.
+                 *
+                 * NOTA: estamos a usar UDP, por isso temos sempre que especificar o endereço de destino para onde queremos
+                 *       enviar o datagrama. É como se fosse uma carta de correio!
+                 *
+                 * NOTA2: a função estática getByName da classe InetAddress é uma função auxiliar que nos permite obter
+                 *        o endereço IP tanto este seja passado como uma string no formato por exemplo: 192.168.1.70 como
+                 *        pelo próprio nome, por exemplo: servidorDaniel.com
+                 *
+                 * NOTA3: ao usarmos o IP de loopback 127.0.0.1 ou o nome "localhost" estamos a dizer que queremos enviar
+                 *        um datagram para uma aplicação que está na nossa própria máquina.
+                 */
+                serverAddr = InetAddress.getByName(args[0]);
+                serverPort = Integer.parseInt(args[1]);
 
+                /**
+                 * Na linha seguinte estamos a criar um DatagramSocket. É através deste que vamos enviar/receber datagramas.
+                 *
+                 * NOTA: estamos a usar um construtor sem parâmetros, ou seja, não estamos a definir nenhum porto. Ao não
+                 *       definir nenhum porto estamos a permitir que o sistema nos atribua um porto automaticamente.
+                 */
+                socket = new DatagramSocket();
+
+                /**
+                 * Na linha seguinta estamos a especificar um tempo de timeout.
+                 * Isto faz com o que ao usar a função receive(), esta fique bloqueada à espera de resposta por X tempo
+                 * (neste caso o timeout é definido pelo valor da constante TIMEOUT)
+                 */
                 socket.setSoTimeout(TIMEOUT * 1000);
 
-                // i)
-                // [PT] Criar o datagram packet com os dados necessários
-                // [EN] Create the datagram packet with the necessary data
-                packet = new DatagramPacket(...);
+                /**
+                 * Na linha seguinte estamos a criar o DatagramPacket.
+                 * Na analogia da carta de correio, este é o passo em que estamos a escrever a nossa carta e vamos especificar,
+                 * além do conteúdo da carta, o tamanho do conteúdo e o endereço IP e porto do destinatário (para onde queremos enviar)
+                 *
+                 * NOTA: neste caso a mensagem que estamos a enviar é o nome do ficheiro que queremos obter.
+                 */
+                packet = new DatagramPacket(fileName.getBytes(), fileName.length(), serverAddr, serverPort);
 
-                // j)
-                // [PT] Enviar o datagram packet
-                // [EN] Send the datagram packet
-                ...
+                /**
+                 * Na linha seguinta vamos utilizar o método send() do nosso socket para efetivamente enviar o datagram packet.
+                 */
+                socket.send(packet);
 
+                /**
+                 * O ciclo do...while() irá ser executado enquanto o tamanho do datragram recebido for maior que 0.
+                 * Foi desenvolvido desta forma porque no enunciado do exercício está especificado que o servidor enviará
+                 * dados enquanto não chegar ao fim do ficheiro, quando chegar ao fim do ficheiro enviará um datagram vazio.
+                 */
                 do {
+                    /**
+                     * Nas linhas seguintes estamos à espera de uma resposta usando o método receive() do socket.
+                     *
+                     * NOTA: o método receive() é bloqueante, ou seja, o código ficará parado nesta linha até receber um datagram
+                     *       ou até ser atingido o timeout (se especificado)
+                     *
+                     * NOTA2: Porque estamos a criar um novo DatagramPacket para receber invés de usar o que utilizámos para enviar?
+                     *        Isto porque a mensagem que recebemos pode ter um tamanho diferente da mensagem que enviámos.
+                     */
                     packet = new DatagramPacket(new byte[MAX_SIZE], MAX_SIZE);
+                    socket.receive(packet);
 
-                    // k)
-                    // [PT] Esperar por um datagram packet de resposta
-                    // [EN] Wait for a response datagram packet
-                    ...
-
+                    /**
+                     * Este if está a usar os métodos getPort() e getAddress() do DatagramPacket para verificar se a mansagem
+                     * recebida veio efetivamente do servidor.
+                     */
                     if (packet.getPort() == serverPort && packet.getAddress().equals(serverAddr)) {
-                        // l)
-                        // [PT] Escrever os dados recebidos para dentro do ficheiro local
-                        // [EN] Write the received data into the local file
-                        localFileOutputStream.write(...);
+                        /**
+                         * É na linha seguinte que estamos a escrever os dados recebidos para dentro no nosso ficheiro.
+                         */
+                        localFileOutputStream.write(packet.getData(), 0, packet.getLength());
 
                         contador++;
                     }
@@ -122,6 +161,9 @@ public class Client {
 
                 System.out.println("Transferencia concluida (numero de blocos: " + contador + ")");
 
+                /**
+                 * Nas linhas seguintes estamos a fazer o tratamento de exceções.
+                 */
             } catch (UnknownHostException e) {
                 System.out.println("Destino desconhecido:\n\t" + e);
             } catch (NumberFormatException e) {
@@ -135,10 +177,21 @@ public class Client {
             }
 
         } finally {
-            // m)
-            // [PT] Libertar os recursos: socket e localFileOutputStream
-            // [EN] Release resources: socket and localFileOutputStream
-            ...
+            /**
+             * Nas linha seguintes estamos a libertar os recursos, nesta caso a fechar o socket e o output stream.
+             *
+             * NOTA: se usarem try-with-resouces evitam de ter este bloco finally.
+             */
+            if (socket != null) {
+                socket.close();
+            }
+            if (localFileOutputStream != null) {
+                try {
+                    localFileOutputStream.close();
+                } catch (IOException e) {
+                }
+            }
+
         }
 
     }
