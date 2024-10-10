@@ -62,8 +62,9 @@ public class Server {
             // d)
             // [PT] Popular as variáveis com os valores dos args
             // [EN] Populate variables with the arg values
-            serverAddr = ...
-            serverPort = ...
+            listeningPort = ...
+
+            serverSocket = new ServerSocket(listeningPort);
             System.out.println("TCP Time Server iniciado...");
 
             while (true) {
