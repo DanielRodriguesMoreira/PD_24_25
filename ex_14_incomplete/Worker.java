@@ -1,4 +1,4 @@
-package pt.isec.pd.ex14;
+package ex_14_incomplete;
 
 import ex_15.models.RequestToWorker;
 
@@ -7,11 +7,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 //Esta classe tambem representa uma thread
-public class DistributedPiWorkerComSerializacao
+public class Worker
 {    
     protected Socket s;
     
-    public DistributedPiWorkerComSerializacao(Socket s)
+    public Worker(Socket s)
     {
         /***/
     }
@@ -82,7 +82,7 @@ public class DistributedPiWorkerComSerializacao
         int nCreatedThreads = 0;
         
         if(args.length != 1){
-            System.out.println("Sintaxe: java DistributedPiWorker <listening port>");
+            System.out.println("Sintaxe: java Worker <listening port>");
             return;
         }
         
@@ -95,12 +95,12 @@ public class DistributedPiWorkerComSerializacao
                 
                 //Inicia uma thread destinada a tratar da comunicacao com o master
                 nCreatedThreads++;
-                t = new Thread(new DistributedPiWorkerComSerializacao(/***/), "Thread_"+nCreatedThreads);
+                t = new Thread(new Worker(/***/), "Thread_"+nCreatedThreads);
                 /***/              
             }            
             
         }catch(IOException e){
-            System.out.println("<DistributedPiWorker> Erro ao aceder ao socket:\n\t" + e);
+            System.out.println("<Worker> Erro ao aceder ao socket:\n\t" + e);
         }
                 
     }
